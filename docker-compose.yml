@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgres://rustuser:rustpassword@db:5432/rustdb
+      - RUST_LOG=none
+      - SERVER_PORT=8080
+      - WS_PORT=8081
+      - TARGET_HTTP_URL=http://host.docker.internal:2345
+      - TARGET_HTTPS_URL=https://host.docker.internal:2346
+      - TARGET_WS_URL=ws://host.docker.internal:2347
+      - HTTP_REQUESTS_PER_MINUTE=10
+      - WS_CONNECTIONS_PER_MINUTE=20
+      - REDIS_URL=redis://redis:6379
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=rustuser
+      - POSTGRES_PASSWORD=rustpassword
+      - POSTGRES_DB=rustdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
